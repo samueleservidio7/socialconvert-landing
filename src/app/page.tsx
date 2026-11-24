@@ -1,150 +1,149 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowRight,
   CheckCircle2,
+  XCircle,
   Zap,
   TrendingUp,
-  Smartphone,
   ShieldCheck,
   MessageCircle,
-  Sparkles,
   Star,
-  Users,
   Clock,
   ChevronDown,
   ChevronUp,
   Send,
+  Calendar,
   Check,
-  BarChart3,
-  Layers,
-  Flame,
   Award,
+  Sparkles,
+  Flame,
+  Activity,
+  Heart,
+  Scale,
 } from "lucide-react";
 
 export default function Home() {
-  // --- STATO CALCOLATORE PREVENTIVO INTERATTIVO ---
-  const [selectedPlan, setSelectedPlan] = useState<"bio" | "landing" | "funnel">("landing");
-  const [needCopywriting, setNeedCopywriting] = useState<boolean>(true);
-  const [needWhatsAppIntegration, setNeedWhatsAppIntegration] = useState<boolean>(true);
-  const [urgentDelivery, setUrgentDelivery] = useState<boolean>(false);
+  // --- STATO DEL QUIZ DI CONVERSIONE (STEP FUNNEL) ---
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [calcProgress, setCalcProgress] = useState<number>(15);
 
-  // Calcolo prezzo dinamico
-  const basePrices = {
-    bio: 290,
-    landing: 590,
-    funnel: 990,
+  const [quizAnswers, setQuizAnswers] = useState({
+    gender: "Uomo",
+    goal: "Ricomposizione Corporea (bruciare grasso e definire)",
+    frequency: "3 volte da 45 min",
+    blocker: "Mancanza di tempo e cene frequenti fuori",
+  });
+
+  const [leadForm, setLeadForm] = useState({
+    name: "",
+    phone: "",
+    preferredTime: "Pomeriggio (14:00 - 18:00)",
+  });
+
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  // Animazione calcolo risultati del Quiz
+  const handleNextToCalculate = () => {
+    setIsCalculating(true);
+    setCurrentStep(4);
+    let progress = 15;
+    const interval = setInterval(() => {
+      progress += 20;
+      if (progress >= 100) {
+        setCalcProgress(100);
+        clearInterval(interval);
+        setTimeout(() => {
+          setIsCalculating(false);
+        }, 500);
+      } else {
+        setCalcProgress(progress);
+      }
+    }, 250);
   };
 
-  const deliveryTimes = {
-    bio: urgentDelivery ? "48 Ore" : "4-5 Giorni",
-    landing: urgentDelivery ? "3 Giorni" : "7 Giorni",
-    funnel: urgentDelivery ? "5 Giorni" : "12-14 Giorni",
+  const handleLeadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
   };
 
-  const calculateTotal = () => {
-    let total = basePrices[selectedPlan];
-    if (needCopywriting) total += 150;
-    if (needWhatsAppIntegration) total += 80;
-    if (urgentDelivery) total += 180;
-    return total;
+  // Generatore link WhatsApp diretto con i dati del Quiz
+  const getWhatsAppLink = () => {
+    const text = encodeURIComponent(
+      `Ciao! Ho completato il test su Instagram.\n\n` +
+        `👤 Nome: ${leadForm.name || "Interessato"}\n` +
+        `🎯 Obiettivo: ${quizAnswers.goal}\n` +
+        `⏱ Disponibilità: ${quizAnswers.frequency}\n` +
+        `🚧 Ostacolo principale: ${quizAnswers.blocker}\n\n` +
+        `Vorrei ricevere la valutazione gratuita e capire se c'è posto per me questo mese!`
+    );
+    return `https://wa.me/393331234567?text=${text}`;
   };
 
   // --- STATO FAQ INTERATTIVE ---
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // --- STATO FORM CONTATTO ---
-  const [formData, setFormData] = useState({
-    name: "",
-    socialHandle: "",
-    email: "",
-    niche: "Consulenza / Coaching",
-    message: "",
-  });
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      // Simulazione invio completato
-    }, 1000);
-  };
-
   const faqs = [
     {
-      q: "Perché un cliente che mi scopre sui social dovrebbe visitare il mio sito invece di scrivermi nei DM?",
-      a: "I messaggi privati su Instagram e TikTok disperdono le vendite: devi rispondere manualmente, spiegare ogni volta i prezzi e perdere ore con persone non in target. Una Landing Page professionale presenta la tua offerta in modo impeccabile, risponde a tutti i dubbi, mostra le recensioni e porta il cliente a comprare o a prenotare in autonomia.",
+      q: "Funziona davvero se lavoro 9-10 ore al giorno e mangio spesso fuori?",
+      a: "È stato progettato esattamente per questo. Oltre l'80% dei nostri allievi sono professionisti, imprenditori o manager con agende piene. Non ti chiederemo di pesare il cibo con il bilancino al ristorante, ma ti insegneremo una guida strategica per fare scelte intelligenti durante cene di lavoro e viaggi.",
     },
     {
-      q: "Quanto tempo serve per avere la pagina online e pronta a ricevere traffico?",
-      a: "In media consegniamo il progetto chiavi in mano entro 5-7 giorni lavorativi. Con l'opzione prioritaria 'Consegna Rapida' possiamo lanciare in sole 48-72 ore.",
+      q: "Devo per forza andare in palestra o posso allenarmi a casa?",
+      a: "Puoi scegliere tu al 100%. Il protocollo viene strutturato in base a dove preferisci allenarti e all'attrezzatura che hai (dalla palestra completa fino a due soli manubri o corpo libero a casa).",
     },
     {
-      q: "Il sito è davvero ottimizzato per chi visita da smartphone?",
-      a: "Assolutamente sì: oltre il 92% del traffico che arriva da Instagram, TikTok e Facebook è da cellulare. Progettiamo con approccio 'Mobile-First', garantendo tempi di caricamento istantanei (sotto 1 secondo) e bottoni facili da cliccare.",
+      q: "Non sono costante: cosa mi garantisce che non mollerò dopo 2 settimane?",
+      a: "La differenza fondamentale rispetto a una normale scheda di palestra è il supporto 1-a-1 continuo: hai un check video approfondito ogni settimana per verificare foto, misure ed energia, più la linea diretta WhatsApp per qualsiasi dubbio ogni singolo giorno. Non sarai mai lasciato solo.",
     },
     {
-      q: "Posso collegare il pulsante WhatsApp o un calendario tipo Calendly?",
-      a: "Certamente! Integriamo pulsanti WhatsApp con messaggi preimpostati, calendari interattivi, moduli contatti automatici e pixel di tracciamento (Meta Pixel, Google Analytics) per monitorare chi visita.",
-    },
-    {
-      q: "Non ho mai gestito un sito: sarò in grado di usarlo?",
-      a: "Sì. Ti consegniamo una video-guida registrata apposta per te dove ti mostriamo passo dopo passo come aggiornare testi, immagini e offerte in pochi click senza toccare una riga di codice.",
+      q: "Cosa succede esattamente dopo che compilo il test qui sotto?",
+      a: "Analizzeremo le tue risposte e ti contatteremo via WhatsApp per fissare la Sessione Strategica Gratuita di 20 minuti. In quella chiamata analizzeremo la tua situazione e ti mostreremo il piano d'azione esatto. Se riterremo entrambi che ci siano i presupposti per lavorare insieme, potrai iniziare il percorso; altrimenti avrai comunque una mappa chiara e gratuita.",
     },
   ];
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
-      {/* SFONDO DINAMICO CON GRADIENTI */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-600/20 blur-[130px] rounded-full" />
-        <div className="absolute top-[30%] right-[-10%] w-[450px] h-[450px] bg-purple-600/15 blur-[140px] rounded-full" />
-        <div className="absolute bottom-[10%] left-[20%] w-[600px] h-[400px] bg-blue-600/10 blur-[150px] rounded-full" />
+    <div className="relative min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden font-sans">
+      {/* 1. BARRA D'URGENZA SUPERIORE (TIPICA DELLE ADS AD ALTA CONVERSIONE) */}
+      <div className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-slate-950 text-xs sm:text-sm font-extrabold py-2 px-4 text-center tracking-tight shadow-md flex items-center justify-center gap-2">
+        <Flame className="w-4 h-4 fill-slate-950" />
+        <span>
+          OFFERTA PROMOZIONALE SOCIAL: Solo <strong className="underline">4 posti rimasti</strong> per il programma con valutazione 1-a-1 gratuita inclusa!
+        </span>
       </div>
 
-      {/* HEADER / BARRA DI NAVIGAZIONE */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/75 border-b border-slate-800/80 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Sparkles className="w-5 h-5 text-white" />
+      {/* SFONDO GLOW */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[5%] left-[10%] w-[500px] h-[500px] bg-amber-500/10 blur-[140px] rounded-full" />
+        <div className="absolute top-[40%] right-[5%] w-[450px] h-[450px] bg-orange-600/10 blur-[150px] rounded-full" />
+        <div className="absolute bottom-[10%] left-[25%] w-[600px] h-[400px] bg-emerald-600/5 blur-[160px] rounded-full" />
+      </div>
+
+      {/* HEADER PULITO */}
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/85 border-b border-slate-800/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-black text-slate-950 text-base shadow-lg shadow-amber-500/25">
+              FP
             </div>
             <div>
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                Social<span className="text-indigo-400">Convert</span>
+              <span className="font-extrabold text-lg tracking-tight text-white">
+                FIT<span className="text-amber-400">PROTOCOL</span>™
               </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-950/80 text-indigo-300 border border-indigo-800/60">
-                Studio Web
+              <span className="block text-[10px] text-slate-400 tracking-wider uppercase font-semibold">
+                Metodo Ricomposizione 90 Giorni
               </span>
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#problema" className="hover:text-indigo-400 transition-colors">
-              Perché serve
-            </a>
-            <a href="#servizi" className="hover:text-indigo-400 transition-colors">
-              I Servizi
-            </a>
-            <a href="#calcolatore" className="hover:text-indigo-400 transition-colors">
-              Calcola Preventivo
-            </a>
-            <a href="#recensioni" className="hover:text-indigo-400 transition-colors">
-              Risultati
-            </a>
-            <a href="#faq" className="hover:text-indigo-400 transition-colors">
-              Domande Frequenti
-            </a>
-          </nav>
-
           <div className="flex items-center gap-3">
             <a
-              href="#calcolatore"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              href="#quiz-section"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-lg shadow-amber-500/25 transition-all"
             >
-              <span>Richiedi Progetto</span>
+              <span>Fai il Test Gratuito</span>
               <ArrowRight className="w-4 h-4" />
             </a>
           </div>
@@ -152,469 +151,635 @@ export default function Home() {
       </header>
 
       <main className="relative z-10">
-        {/* HERO SECTION */}
-        <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 border border-indigo-500/30 text-indigo-300 text-xs sm:text-sm font-medium mb-8 backdrop-blur-md shadow-inner">
-            <Flame className="w-4 h-4 text-orange-400" />
-            <span>Siti Web e Landing Page ad altissima conversione per i tuoi Social</span>
+        {/* HERO SECTION DEDICATA A CHI VIENE DALLE ADS */}
+        <section className="pt-12 sm:pt-20 pb-16 px-4 sm:px-6 max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs sm:text-sm font-semibold mb-6 backdrop-blur-md">
+            <Zap className="w-4 h-4 fill-amber-400" />
+            <span>Niente diete da fame. Niente 2 ore al giorno in palestra.</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white max-w-5xl mx-auto leading-[1.15]">
-            Trasforma i tuoi follower in{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent underline decoration-indigo-500/40 decoration-wavy decoration-2">
-              Clienti Paganti
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.15] max-w-4xl mx-auto">
+            Raggiungi la tua migliore forma fisica in 90 giorni con{" "}
+            <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300 bg-clip-text text-transparent underline decoration-amber-500/50 decoration-2">
+              3 sessioni da 45 min a settimana
             </span>
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto font-normal leading-relaxed">
-            Se ottieni visite da <strong>Instagram, TikTok, LinkedIn o annunci sponsorizzati</strong>, 
-            mandare le persone su un sito lento o su una bio dispersiva ti fa perdere l&apos;80% delle vendite.
-            Costruiamo pagine vetrina ultra-rapide e persuasive, progettate per farti vendere di più fin dal primo click.
+          <p className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
+            Il metodo scientifico di ricomposizione corporea creato per <strong>professionisti e persone impegnate</strong>: brucia il grasso addominale ostinato e definisci il tuo fisico senza rinunciare a cene di lavoro e vita sociale.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="#calcolatore"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-105 transition-all"
+              href="#quiz-section"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-extrabold bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 shadow-xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 active:scale-95 transition-all"
             >
-              <Zap className="w-5 h-5 text-yellow-300" />
-              <span>Configura il tuo Sito & Prezzo</span>
+              <Sparkles className="w-5 h-5 fill-slate-950" />
+              <span>SCOPRI IL TUO PIANO IN 60 SECONDI</span>
               <ArrowRight className="w-5 h-5" />
             </a>
-            <a
-              href="#servizi"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 transition-all"
-            >
-              <span>Scopri come funziona</span>
-            </a>
           </div>
 
-          {/* SOCIAL PROOF & METRICHE ISTANTANEE */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-3xl font-extrabold text-indigo-400">+185%</div>
-              <div className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
-                Contatti & Conversioni medie
+          {/* SOCIAL PROOF IMMEDIATA SOTTO IL TITOLO */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-slate-300">
+            <div className="flex items-center gap-2">
+              <div className="flex text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400" />
+                ))}
               </div>
+              <span className="font-bold text-white">4.9 / 5</span>
+              <span className="text-slate-400">(420+ Allievi Trasformati)</span>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-3xl font-extrabold text-emerald-400">&lt; 0.8s</div>
-              <div className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
-                Velocità di apertura da mobile
-              </div>
-            </div>
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-3xl font-extrabold text-purple-400">100%</div>
-              <div className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
-                Ottimizzato per Smartphone
-              </div>
-            </div>
-            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-              <div className="text-3xl font-extrabold text-pink-400">5 Giorni</div>
-              <div className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
-                Tempi medi di consegna
-              </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <span className="font-semibold text-slate-200">Garanzia Risultato Soddisfatti o Rimborsati</span>
             </div>
           </div>
         </section>
 
-        {/* SEZIONE: IL PROBLEMA VS LA SOLUZIONE */}
-        <section id="problema" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-400">
-              Analisi Strategica
-            </h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
-              Perché i vecchi metodi ti stanno facendo perdere vendite ogni giorno
-            </p>
-          </div>
+        {/* 2. IL CUORE DELLA CONVERSIONE: IL QUIZ DI QUALIFICAZIONE INTERATTIVO */}
+        <section id="quiz-section" className="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto">
+          <div className="bg-slate-900/90 border-2 border-amber-500/40 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-2xl relative overflow-hidden">
+            {/* BADGE DI TEST */}
+            <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Valutazione Gratuita di Idoneità
+                </span>
+              </div>
+              <div className="text-xs font-bold text-slate-400">
+                Passo {currentStep} di 4
+              </div>
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* Box Negativo */}
-            <div className="p-8 rounded-2xl bg-rose-950/20 border border-rose-900/50 backdrop-blur-sm relative overflow-hidden">
-              <div className="flex items-center gap-3 text-rose-400 font-bold text-lg mb-6">
-                <div className="w-8 h-8 rounded-full bg-rose-900/50 flex items-center justify-center">
-                  ✕
+            {/* STEP 1: OBIETTIVO */}
+            {currentStep === 1 && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-white text-center">
+                  1. Qual è il tuo obiettivo primario nei prossimi 90 giorni?
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 text-center -mt-3">
+                  Seleziona l&apos;obiettivo che descrive meglio il tuo punto di arrivo desiderato.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                  {[
+                    {
+                      title: "Bruciare Grasso Addominale",
+                      desc: "Eliminare i chili di troppo e snellire la pancia",
+                      icon: Flame,
+                    },
+                    {
+                      title: "Ricomposizione Corporea",
+                      desc: "Perdere grasso e definire muscoli contemporaneamente",
+                      icon: Activity,
+                    },
+                    {
+                      title: "Costruire Massa Pulita",
+                      desc: "Aumentare le spalle, braccia e densità muscolare",
+                      icon: TrendingUp,
+                    },
+                    {
+                      title: "Energia & Postura",
+                      desc: "Eliminare dolori alla schiena e sentirti in forma",
+                      icon: Heart,
+                    },
+                  ].map((item, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setQuizAnswers({ ...quizAnswers, goal: item.title });
+                        setCurrentStep(2);
+                      }}
+                      className={`p-4 rounded-2xl border text-left transition-all flex items-start gap-3.5 group hover:border-amber-400 ${
+                        quizAnswers.goal === item.title
+                          ? "bg-amber-500/15 border-amber-500 text-white"
+                          : "bg-slate-950/70 border-slate-800 text-slate-300 hover:bg-slate-800/60"
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-sm text-white">{item.title}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">{item.desc}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-                <span>Cosa succede con un sito comune o un link generico:</span>
               </div>
-              <ul className="space-y-4 text-slate-300 text-sm sm:text-base">
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-400 font-bold mt-0.5">•</span>
-                  <span><strong>Dispersione totale:</strong> Un elenco disordinato di 10 link diversi dove il cliente non sa dove cliccare e chiude la pagina.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-400 font-bold mt-0.5">•</span>
-                  <span><strong>Caricamento lumaca:</strong> Se il sito impiega più di 2 secondi ad aprirsi su 4G/5G, il 53% degli utenti torna su Instagram.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-rose-400 font-bold mt-0.5">•</span>
-                  <span><strong>Zero fiducia:</strong> Pagine anonime senza recensioni in vista e senza un messaggio chiaro che spieghi subito il vantaggio per chi acquista.</span>
-                </li>
-              </ul>
-            </div>
+            )}
 
-            {/* Box Positivo */}
-            <div className="p-8 rounded-2xl bg-indigo-950/30 border border-indigo-800/60 backdrop-blur-sm relative overflow-hidden shadow-xl shadow-indigo-950/50">
-              <div className="flex items-center gap-3 text-indigo-300 font-bold text-lg mb-6">
-                <div className="w-8 h-8 rounded-full bg-indigo-600/40 flex items-center justify-center">
-                  <Check className="w-5 h-5 text-indigo-300" />
+            {/* STEP 2: TEMPO A DISPOSIZIONE */}
+            {currentStep === 2 && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-white text-center">
+                  2. Quante volte a settimana puoi dedicare all&apos;allenamento?
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 text-center -mt-3">
+                  Non mentire a te stesso: il programma deve adattarsi alla tua vita reale, non il contrario.
+                </p>
+
+                <div className="space-y-3 pt-2">
+                  {[
+                    {
+                      label: "2 sessioni da 40-45 minuti",
+                      sub: "Per chi ha un'agenda estremamente piena (Protocollo Alta Densità)",
+                    },
+                    {
+                      label: "3 sessioni da 45-50 minuti (CONSIGLIATO)",
+                      sub: "Il punto ideale per massima efficienza e risultati rapidi",
+                    },
+                    {
+                      label: "4 o più sessioni a settimana",
+                      sub: "Per chi vuole dedicare più tempo e accelerare al massimo",
+                    },
+                  ].map((opt, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setQuizAnswers({ ...quizAnswers, frequency: opt.label });
+                        setCurrentStep(3);
+                      }}
+                      className="w-full p-4 rounded-2xl border bg-slate-950/70 border-slate-800 hover:border-amber-400 text-left transition-all flex items-center justify-between group hover:bg-slate-800/60"
+                    >
+                      <div>
+                        <div className="font-bold text-sm text-white group-hover:text-amber-400 transition-colors">
+                          {opt.label}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">{opt.sub}</div>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
+                    </button>
+                  ))}
                 </div>
-                <span>Cosa ottieni con le nostre Landing Page Vetrina:</span>
+
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="text-xs text-slate-400 hover:text-white underline"
+                  >
+                    ← Torna indietro
+                  </button>
+                </div>
               </div>
-              <ul className="space-y-4 text-slate-200 text-sm sm:text-base">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Un solo obiettivo chiaro:</strong> Guidare il visitatore a prenotare una consulenza, scriverti su WhatsApp o acquistare subito.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Velocità estrema:</strong> Codice moderno su server globali ultra-veloci (gli stessi di Vercel), per aprirsi all&apos;istante.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                  <span><strong>Autorità e Social Proof:</strong> Recensioni in evidenza, numeri reali e design degno dei brand più famosi.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
+            )}
 
-        {/* SEZIONE SERVIZI */}
-        <section id="servizi" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-400">
-              Soluzioni Chiavi in Mano
-            </h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
-              Cosa possiamo creare per te o per i tuoi clienti
-            </p>
-          </div>
+            {/* STEP 3: OSTACOLO PRINCIPALE */}
+            {currentStep === 3 && (
+              <div className="space-y-6 animate-fadeIn">
+                <h3 className="text-xl sm:text-2xl font-extrabold text-white text-center">
+                  3. Qual è stato finora il tuo ostacolo più grande?
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-400 text-center -mt-3">
+                  Capire cosa non ha funzionato in passato è l&apos;unico modo per non ripetere lo stesso errore.
+                </p>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Servizio 1 */}
-            <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 transition-all hover:-translate-y-1 group">
-              <div className="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform">
-                <Smartphone className="w-7 h-7" />
+                <div className="space-y-3 pt-2">
+                  {[
+                    "Mancanza di tempo tra lavoro, famiglia e impegni",
+                    "Diete rigide da fame che non riesco a mantenere nel weekend",
+                    "Mancanza di costanza quando mi alleno da solo senza qualcuno che mi guidi",
+                    "Metabolismo apparentemente bloccato: faccio fatica a perdere l'ultimo grasso",
+                  ].map((obs, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setQuizAnswers({ ...quizAnswers, blocker: obs });
+                        handleNextToCalculate();
+                      }}
+                      className="w-full p-4 rounded-2xl border bg-slate-950/70 border-slate-800 hover:border-amber-400 text-left transition-all flex items-center justify-between group hover:bg-slate-800/60"
+                    >
+                      <span className="font-semibold text-sm text-slate-200 group-hover:text-amber-300">
+                        {obs}
+                      </span>
+                      <Check className="w-5 h-5 text-slate-600 group-hover:text-amber-400" />
+                    </button>
+                  ))}
+                </div>
+
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
+                    className="text-xs text-slate-400 hover:text-white underline"
+                  >
+                    ← Torna indietro
+                  </button>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                1. Bio-Page Interattiva
-              </h3>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Sostituisci il banale Linktree con una mini-applicazione su misura: grafica personalizzata con i colori del brand, video di benvenuto, offerte in risalto e link diretti.
-              </p>
-              <div className="border-t border-slate-800/80 pt-4 text-xs text-indigo-300 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Ideale per Creator & Micro-Brand
-              </div>
-            </div>
+            )}
 
-            {/* Servizio 2 */}
-            <div className="p-8 rounded-2xl bg-gradient-to-b from-indigo-950/40 to-slate-900/80 border-2 border-indigo-500/60 relative transition-all hover:-translate-y-1 shadow-xl shadow-indigo-950/50 group">
-              <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[11px] font-bold bg-gradient-to-r from-indigo-500 to-pink-500 text-white uppercase tracking-wider">
-                Più Richiesto
-              </div>
-              <div className="w-14 h-14 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300 mb-6 group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-7 h-7" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                2. Landing Page Vetrina / Lead Gen
-              </h3>
-              <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                Una pagina vetrina completa studiata per liberi professionisti, consulenti, personal trainer, studi e agenzie. Presenta i servizi, testimonianze e modulo di prenotazione diretta.
-              </p>
-              <div className="border-t border-slate-800/80 pt-4 text-xs text-purple-300 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Perfetta per Professionisti & Attività
-              </div>
-            </div>
-
-            {/* Servizio 3 */}
-            <div className="p-8 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/50 transition-all hover:-translate-y-1 group">
-              <div className="w-14 h-14 rounded-xl bg-pink-600/20 border border-pink-500/30 flex items-center justify-center text-pink-400 mb-6 group-hover:scale-110 transition-transform">
-                <Layers className="w-7 h-7" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                3. Pagina Vendita Prodotto / Funnel
-              </h3>
-              <p className="text-slate-400 text-sm leading-relaxed mb-6">
-                Studiata per vendere un prodotto digitale (videocorso, ebook, guida), un servizio continuativo o un abbonamento con copywriting persuasivo e checkout integrato.
-              </p>
-              <div className="border-t border-slate-800/80 pt-4 text-xs text-pink-300 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Ideale per Infoprodotti & Corsi
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SEZIONE: CALCOLATORE PREVENTIVO INTERATTIVO */}
-        <section id="calcolatore" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-900/50 text-indigo-300 border border-indigo-700/50">
-              <BarChart3 className="w-3.5 h-3.5" /> Simulatore Interattivo
-            </span>
-            <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-white">
-              Calcola il preventivo e i tempi in tempo reale
-            </h2>
-            <p className="mt-3 text-slate-300 text-sm sm:text-base">
-              Personalizza le caratteristiche della pagina e vedi istantaneamente il costo stimato e i giorni di lavorazione.
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
-            {/* Scelta Tipo di Pagina */}
-            <div className="mb-8">
-              <label className="block text-sm font-semibold text-slate-300 mb-3">
-                1. Scegli il tipo di struttura web:
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("bio")}
-                  className={`p-4 rounded-xl border text-left transition-all ${
-                    selectedPlan === "bio"
-                      ? "bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-600/20"
-                      : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <div className="font-bold text-base text-white">Bio-Page Interattiva</div>
-                  <div className="text-xs text-slate-400 mt-1">Per link in bio avanzato</div>
-                  <div className="text-sm font-extrabold text-indigo-400 mt-3">290 €</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("landing")}
-                  className={`p-4 rounded-xl border text-left transition-all ${
-                    selectedPlan === "landing"
-                      ? "bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-600/20"
-                      : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <div className="font-bold text-base text-white flex items-center justify-between">
-                    <span>Landing Vetrina</span>
-                    <span className="text-[10px] bg-indigo-500 text-white px-2 py-0.5 rounded-full font-bold">TOP</span>
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">Per servizi e consulenze</div>
-                  <div className="text-sm font-extrabold text-indigo-400 mt-3">590 €</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("funnel")}
-                  className={`p-4 rounded-xl border text-left transition-all ${
-                    selectedPlan === "funnel"
-                      ? "bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-600/20"
-                      : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700"
-                  }`}
-                >
-                  <div className="font-bold text-base text-white">Funnel & Vendita</div>
-                  <div className="text-xs text-slate-400 mt-1">Per corsi e prodotti</div>
-                  <div className="text-sm font-extrabold text-indigo-400 mt-3">990 €</div>
-                </button>
-              </div>
-            </div>
-
-            {/* Opzioni Aggiuntive */}
-            <div className="mb-8">
-              <label className="block text-sm font-semibold text-slate-300 mb-3">
-                2. Servizi opzionali aggiuntivi:
-              </label>
-              <div className="space-y-3">
-                <label className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 cursor-pointer hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={needCopywriting}
-                      onChange={(e) => setNeedCopywriting(e.target.checked)}
-                      className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <div className="text-sm font-semibold text-white">
-                        Scrittura Testi Strategici (Copywriting Persuasivo)
-                      </div>
-                      <div className="text-xs text-slate-400">
-                        Scriviamo noi i titoli e i testi per convincere il visitatore a comprare
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-bold text-slate-300">+150 €</div>
-                </label>
-
-                <label className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 cursor-pointer hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={needWhatsAppIntegration}
-                      onChange={(e) => setNeedWhatsAppIntegration(e.target.checked)}
-                      className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <div className="text-sm font-semibold text-white">
-                        Integrazione WhatsApp & Calendario Automatico
-                      </div>
-                      <div className="text-xs text-slate-400">
-                        Pulsante rapido con messaggio pronto e modulo appuntamenti Calendly
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-bold text-slate-300">+80 €</div>
-                </label>
-
-                <label className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 border border-slate-800/80 cursor-pointer hover:border-slate-700 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={urgentDelivery}
-                      onChange={(e) => setUrgentDelivery(e.target.checked)}
-                      className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-900 border-slate-700"
-                    />
-                    <div>
-                      <div className="text-sm font-semibold text-white">
-                        Consegna Rapida Prioritaria
-                      </div>
-                      <div className="text-xs text-slate-400">
-                        Lancio prioritario in tempi dimezzati
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-bold text-slate-300">+180 €</div>
-                </label>
-              </div>
-            </div>
-
-            {/* Risultato Totale e Riepilogo */}
-            <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-950/80 to-purple-950/80 border border-indigo-700/60 flex flex-col sm:flex-row items-center justify-between gap-6">
+            {/* STEP 4: ELABORAZIONE E SBLOCCO CANDIDATURA */}
+            {currentStep === 4 && (
               <div>
-                <div className="text-xs uppercase font-bold tracking-wider text-indigo-300">
-                  Preventivo Stimato
-                </div>
-                <div className="text-4xl font-extrabold text-white mt-1">
-                  {calculateTotal()} €
-                  <span className="text-xs font-normal text-slate-400 ml-2">una tantum</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-300 mt-2">
-                  <Clock className="w-4 h-4 text-emerald-400" />
-                  <span>Tempi di consegna stimati: <strong>{deliveryTimes[selectedPlan]}</strong></span>
-                </div>
-              </div>
+                {isCalculating ? (
+                  <div className="py-12 text-center space-y-5 animate-pulse">
+                    <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                      <Zap className="w-8 h-8 animate-spin" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">
+                      Elaborazione del tuo Profilo Metabolico...
+                    </h3>
+                    <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                      Verifica compatibilità con il Metodo Ricomposizione 90 Giorni e calcolo del deficit calorico sostenibile.
+                    </p>
+                    <div className="w-full bg-slate-800 h-3 rounded-full overflow-hidden max-w-md mx-auto">
+                      <div
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 h-full transition-all duration-300"
+                        style={{ width: `${calcProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : isSubmitted ? (
+                  /* SCHERMATA FINALE DI SUCCESSO */
+                  <div className="py-8 text-center space-y-6 animate-fadeIn">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+                      <CheckCircle2 className="w-10 h-10" />
+                    </div>
+                    <div className="inline-block px-3 py-1 rounded-full bg-emerald-950 border border-emerald-500/50 text-emerald-400 text-xs font-bold">
+                      PROFILO IDONEO AL PROTOCOLLO
+                    </div>
+                    <h3 className="text-2xl font-black text-white">
+                      Complimenti {leadForm.name || "Campione"}! La tua richiesta è stata presa in carico.
+                    </h3>
+                    <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
+                      Abbiamo registrato le tue risposte. Per saltare la fila e ricevere subito l&apos;analisi strategica, puoi scriverci direttamente su WhatsApp cliccando qui sotto:
+                    </p>
 
-              <a
-                href="#contatti"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold bg-white text-slate-950 hover:bg-slate-100 shadow-lg shadow-white/10 transition-all hover:scale-105"
-              >
-                <span>Conferma e Richiedi</span>
-                <ArrowRight className="w-4 h-4" />
-              </a>
+                    <div className="pt-2">
+                      <a
+                        href={getWhatsAppLink()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-base bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xl shadow-emerald-500/30 transition-all hover:scale-105"
+                      >
+                        <MessageCircle className="w-6 h-6 fill-slate-950" />
+                        <span>APRI WHATSAPP & CONFERMA IL TUO POSTO</span>
+                      </a>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      Un nostro Coach ti risponderà personalmente entro poche ore lavorative.
+                    </p>
+                  </div>
+                ) : (
+                  /* MODULO PER RICEVERE IL PIANO E SBLOCCARE LA CALL */
+                  <div className="space-y-6 animate-fadeIn">
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-amber-400 shrink-0" />
+                      <div className="text-xs sm:text-sm text-amber-200">
+                        <strong>Buone notizie!</strong> In base alle tue risposte ({quizAnswers.goal}, {quizAnswers.frequency}), il tuo profilo è idoneo al <strong>Protocollo Ricomposizione 90D</strong>.
+                      </div>
+                    </div>
+
+                    <div className="text-center">
+                      <h3 className="text-xl sm:text-2xl font-black text-white">
+                        Sblocca la tua Consulenza Strategica Gratuita (Valore 97€)
+                      </h3>
+                      <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                        Inserisci i tuoi dati per ricevere il piano preliminare e bloccare uno dei 4 posti rimasti:
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleLeadSubmit} className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          Il tuo Nome di Battesimo *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={leadForm.name}
+                          onChange={(e) => setLeadForm({ ...leadForm, name: e.target.value })}
+                          placeholder="es. Andrea"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          Numero di Telefono WhatsApp *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={leadForm.phone}
+                          onChange={(e) => setLeadForm({ ...leadForm, phone: e.target.value })}
+                          placeholder="es. 340 1234567"
+                          className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 text-sm focus:outline-none focus:border-amber-400 transition-colors"
+                        />
+                        <span className="text-[11px] text-slate-500 mt-1 block">
+                          🔒 Ti scriveremo solo per confermare l&apos;orario della consulenza. Zero spam.
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          Fascia oraria ideale per essere contattato
+                        </label>
+                        <select
+                          value={leadForm.preferredTime}
+                          onChange={(e) => setLeadForm({ ...leadForm, preferredTime: e.target.value })}
+                          className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-amber-400 transition-colors"
+                        >
+                          <option>Mattina (09:00 - 13:00)</option>
+                          <option>Pomeriggio (14:00 - 18:00)</option>
+                          <option>Sera (18:30 - 20:30)</option>
+                        </select>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-4 rounded-xl font-black text-base bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 shadow-xl shadow-amber-500/30 hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <span>INVIA E BLOCCA IL TUO POSTO GRATIS</span>
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 3. CONFRONTO: METODO TRADIZIONALE VS FITPROTOCOL */}
+        <section className="py-16 px-4 sm:px-6 max-w-5xl mx-auto border-t border-slate-800/80">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Perché il 95% delle diete fallisce
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">
+              Basta sprecare mesi con approcci insostenibili
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* VECCHIO METODO */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-rose-950/20 border border-rose-900/40">
+              <div className="flex items-center gap-3 text-rose-400 font-bold text-lg mb-6">
+                <XCircle className="w-6 h-6 shrink-0" />
+                <span>La solita palestra / diete standard:</span>
+              </div>
+              <ul className="space-y-4 text-slate-300 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-500 font-bold mt-0.5">✕</span>
+                  <span><strong>5-6 giorni a settimana:</strong> Passi 2 ore al giorno tra macchinari senza sapere se stai facendo bene gli esercizi.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-500 font-bold mt-0.5">✕</span>
+                  <span><strong>Diete restrittive estreme:</strong> Solo riso in bianco, petto di pollo e zero vita sociale fino a quando crolli nel weekend.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-rose-500 font-bold mt-0.5">✕</span>
+                  <span><strong>Nessun supporto reale:</strong> Ti danno una scheda fotocopiata e sei abbandonato a te stesso per i 3 mesi successivi.</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* METODO FITPROTOCOL */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-amber-950/20 border-2 border-amber-500/60 shadow-xl shadow-amber-950/40">
+              <div className="flex items-center gap-3 text-amber-300 font-bold text-lg mb-6">
+                <CheckCircle2 className="w-6 h-6 text-amber-400 shrink-0" />
+                <span>Il Metodo FitProtocol™:</span>
+              </div>
+              <ul className="space-y-4 text-slate-200 text-sm">
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>3 sessioni da 45 minuti mirate:</strong> Lavoriamo sull&apos;intensità scientifica per stimolare il muscolo e accelerare il metabolismo.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Nutrizione Flessibile Sostenibile:</strong> Nessun alimento vietato. Puoi goderti la pizza del sabato e le cene di lavoro senza sensi di colpa.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <span><strong>Check Video Settimanale & WhatsApp 7/7:</strong> Un coach dedicato analizza i tuoi progressi ogni domenica e adatta il piano su misura.</span>
+                </li>
+              </ul>
             </div>
           </div>
         </section>
 
-        {/* SEZIONE RECENSIONI E RISULTATI */}
-        <section id="recensioni" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-slate-800/60">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-400">
-              Casi Studio Reali
+        {/* 4. CASI STUDIO CON RISULTATI REALI (SOCIAL PROOF CONVERTITRICE) */}
+        <section className="py-16 px-4 sm:px-6 max-w-6xl mx-auto border-t border-slate-800/80">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Risultati Verificati
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">
+              Le trasformazioni dei nostri allievi
             </h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
-              Cosa dicono i creator e i professionisti che lo usano
+            <p className="text-slate-400 text-sm mt-2">
+              Persone con vite piene e poco tempo che hanno scelto di smettere di rimandare.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="flex items-center gap-1 text-amber-400 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400" />
-                ))}
+            <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-800">
+                    -9.4 KG IN 12 SETTIMANE
+                  </span>
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 italic">
+                  &ldquo;Lavoro 10 ore al giorno in studio legale. Pensavo fosse impossibile rimettermi in sesto. In 3 mesi ho perso quasi 10 kg di grasso addominale allenandomi solo nella pausa pranzo per 45 minuti.&rdquo;
+                </p>
               </div>
-              <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                &ldquo;Prima le persone arrivavano dai miei reel di fitness su Instagram ma nessuno comprava le mie schede di allenamento. Con la nuova landing page ho registrato 26 nuovi clienti nel primo mese.&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-sm">
-                  MT
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-800/80">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 font-black text-slate-950 flex items-center justify-center text-sm">
+                  FL
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Marco T.</div>
-                  <div className="text-xs text-slate-400">Personal Trainer (34k follower IG)</div>
+                  <div className="text-sm font-bold text-white">Francesco L., 38 anni</div>
+                  <div className="text-xs text-slate-400">Avvocato & Padre di 2 figli</div>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="flex items-center gap-1 text-amber-400 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400" />
-                ))}
+            <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 rounded-full bg-amber-950 text-amber-400 text-xs font-bold border border-amber-800">
+                    RICOMPOSIZIONE COMPLETA
+                  </span>
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 italic">
+                  &ldquo;La cosa migliore è che non mi sento a dieta. Il sabato mangio la pizza con gli amici e continuo a vedere l&apos;addome definirsi. Il check settimanale su WhatsApp ti tiene davvero sul pezzo.&rdquo;
+                </p>
               </div>
-              <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                &ldquo;Il tasto per scrivermi direttamente su WhatsApp con il messaggio già compilato è una genialata. Chi visita dal link in bio non ha più scuse e ricevo lead caldi ogni giorno.&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-500 to-rose-500 flex items-center justify-center font-bold text-white text-sm">
-                  EB
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-800/80">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-500 font-black text-slate-950 flex items-center justify-center text-sm">
+                  MD
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Elena B.</div>
-                  <div className="text-xs text-slate-400">Consulente Fiscale & Finanziaria</div>
+                  <div className="text-sm font-bold text-white">Matteo D., 31 anni</div>
+                  <div className="text-xs text-slate-400">Software Engineer & Imprenditore</div>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="flex items-center gap-1 text-amber-400 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-amber-400" />
-                ))}
+            <div className="p-6 rounded-3xl bg-slate-900/70 border border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="px-3 py-1 rounded-full bg-emerald-950 text-emerald-400 text-xs font-bold border border-emerald-800">
+                    -12.8 KG & ENERGIA AL TOP
+                  </span>
+                  <div className="flex text-amber-400">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-slate-300 text-sm leading-relaxed mb-6 italic">
+                  &ldquo;Avevo provato decine di diete fallite dopo 2 settimane. Con FitProtocol ho imparato come mangiare senza stress e ho ritrovato un&apos;energia pazzesca che mi aiuta anche nel lavoro.&rdquo;
+                </p>
               </div>
-              <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                &ldquo;La velocità di caricamento fa tutta la differenza del mondo. Il vecchio sito impiegava 4 secondi, questo si apre all&apos;istante appena clicchi dal profilo TikTok.&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-white text-sm">
-                  LR
+              <div className="flex items-center gap-3 pt-4 border-t border-slate-800/80">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-500 font-black text-slate-950 flex items-center justify-center text-sm">
+                  GS
                 </div>
                 <div>
-                  <div className="text-sm font-bold text-white">Luca R.</div>
-                  <div className="text-xs text-slate-400">Founder Brand E-commerce</div>
+                  <div className="text-sm font-bold text-white">Gabriele S., 45 anni</div>
+                  <div className="text-xs text-slate-400">Commercialista & Titolare di Studio</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* FAQ ACCORDION INTERATTIVO */}
-        <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-800/60">
-          <div className="text-center mb-16">
-            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-indigo-400">
-              Dubbi Comuni
+        {/* 5. COSA INCLUDE IL PERCORSO (VALUE STACK) */}
+        <section className="py-16 px-4 sm:px-6 max-w-4xl mx-auto border-t border-slate-800/80">
+          <div className="text-center mb-12">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Supporto Completo Chiavi in Mano
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">
+              Cosa include il Protocollo 90 Giorni
             </h2>
-            <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-white">
-              Domande Frequenti
-            </p>
           </div>
 
           <div className="space-y-4">
+            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <Activity className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base">
+                  1. Scheda di Allenamento Personalizzata su App Dedicata
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
+                  Video esplicativi in 4K per ogni esercizio, carichi tracciati automaticamente e timer di recupero. Sai esattamente cosa fare in ogni singolo minuto.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <Scale className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base">
+                  2. Piano Nutrizionale Flessibile & Guida per Ristoranti
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
+                  Niente cibi noiosi o pesate maniacali. Imparerai le porzioni visive e le strategie per goderti aperitivi, pranzi di lavoro e cene fuori continuando a perdere grasso.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base">
+                  3. Check-In Video Settimanale di Verifica
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
+                  Ogni domenica carichi foto e misure: il tuo Coach dedicato analizza la risposta del tuo corpo e calibra calorie e allenamento per garantire progressi continui.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-base">
+                  4. Linea Diretta Privata su WhatsApp 7/7
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1 leading-relaxed">
+                  Un dubbio sul menù al ristorante? Una correzione rapida all&apos;esecuzione di un esercizio? Ti basta inviare un messaggio o un breve video per ricevere feedback immediato.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. GARANZIA A RISCHIO ZERO */}
+        <section className="py-12 px-4 sm:px-6 max-w-4xl mx-auto">
+          <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-amber-950/40 to-slate-900 border-2 border-amber-500/50 text-center relative overflow-hidden">
+            <div className="w-14 h-14 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black text-white">
+              La Nostra Garanzia &ldquo;Risultato o Rimborsato&rdquo; a 30 Giorni
+            </h3>
+            <p className="mt-4 text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Siamo così certi dell&apos;efficacia del nostro metodo scientifico che ci assumiamo noi tutto il rischio: se segui il protocollo per i primi 30 giorni e non vedi un cambiamento visibile e misurabile, ti rimborsiamo ogni singolo centesimo senza discussioni.
+            </p>
+          </div>
+        </section>
+
+        {/* 7. DOMANDE FREQUENTI (FAQ) */}
+        <section className="py-16 px-4 sm:px-6 max-w-3xl mx-auto border-t border-slate-800/80">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-white">
+              Domande Frequenti
+            </h2>
+          </div>
+
+          <div className="space-y-3">
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
               return (
                 <div
                   key={index}
-                  className="rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden transition-all"
+                  className="rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-white hover:text-indigo-300 transition-colors"
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-white hover:text-amber-300 transition-colors"
                   >
-                    <span className="text-base sm:text-lg">{faq.q}</span>
+                    <span className="text-sm sm:text-base">{faq.q}</span>
                     {isOpen ? (
-                      <ChevronUp className="w-5 h-5 text-indigo-400 shrink-0" />
+                      <ChevronUp className="w-5 h-5 text-amber-400 shrink-0" />
                     ) : (
                       <ChevronDown className="w-5 h-5 text-slate-400 shrink-0" />
                     )}
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 pt-1 text-slate-300 text-sm sm:text-base leading-relaxed border-t border-slate-800/40">
+                    <div className="px-5 pb-5 pt-1 text-slate-300 text-xs sm:text-sm leading-relaxed border-t border-slate-800/40">
                       {faq.a}
                     </div>
                   )}
@@ -624,142 +789,60 @@ export default function Home() {
           </div>
         </section>
 
-        {/* MODULO DI CONTATTO / PRENOTAZIONE PROGETTO */}
-        <section id="contatti" className="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-slate-800/60">
-          <div className="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative">
-            <div className="text-center max-w-xl mx-auto mb-10">
-              <h2 className="text-3xl font-extrabold text-white">
-                Pronto a lanciare la tua Landing Page?
-              </h2>
-              <p className="mt-2 text-slate-400 text-sm">
-                Compila i dettagli qui sotto: riceverai un&apos;analisi gratuita del tuo profilo social e la bozza della struttura ideale entro 24 ore.
-              </p>
+        {/* 8. CTA FINALE */}
+        <section className="py-16 px-4 sm:px-6 text-center border-t border-slate-800/80 bg-slate-950">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Smetti di rimandare la forma fisica che meriti
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              Fai il test gratuito in 60 secondi e scopri se il tuo profilo è idoneo per i 4 posti disponibili questo mese.
+            </p>
+            <div className="pt-2">
+              <a
+                href="#quiz-section"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl text-base font-black bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 shadow-xl shadow-amber-500/30 hover:scale-105 active:scale-95 transition-all"
+              >
+                <Zap className="w-5 h-5 fill-slate-950" />
+                <span>FAI IL TEST GRATUITO ORA</span>
+                <ArrowRight className="w-5 h-5" />
+              </a>
             </div>
-
-            {isSubmitted ? (
-              <div className="p-8 rounded-2xl bg-emerald-950/40 border border-emerald-500/50 text-center animate-fadeIn">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  Richiesta Ricevuta con Successo!
-                </h3>
-                <p className="text-slate-300 text-sm max-w-md mx-auto">
-                  Grazie {formData.name || "amico"}! Analizzeremo il tuo profilo <strong>{formData.socialHandle || "@tuo_profilo"}</strong> e ti risponderemo all&apos;indirizzo <strong>{formData.email}</strong> entro poche ore.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setIsSubmitted(false)}
-                  className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white transition-all"
-                >
-                  Invia un&apos;altra richiesta
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-                      Il tuo Nome o Nome Brand *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="es. Marco Rossi"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-                      Profilo Social (Instagram / TikTok) *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.socialHandle}
-                      onChange={(e) => setFormData({ ...formData, socialHandle: e.target.value })}
-                      placeholder="es. @marcorossi_fit"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-                      Email di contatto *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="es. marco@email.com"
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-                      Settore / Tipologia di Attività
-                    </label>
-                    <select
-                      value={formData.niche}
-                      onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                    >
-                      <option>Consulenza / Coaching</option>
-                      <option>Fitness / Benessere</option>
-                      <option>E-commerce / Prodotti Fisici</option>
-                      <option>Infoprodotti / Corsi Online</option>
-                      <option>Studio Professionale / Agenzia</option>
-                      <option>Altro</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-400 mb-2">
-                    Cosa vendi o quale obiettivo vuoi raggiungere? (Opzionale)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Raccontaci brevemente qual è il tuo servizio principale e cosa vorresti che facessero i visitatori sul sito..."
-                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-4 rounded-xl font-bold text-base bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-xl shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
-                >
-                  <Send className="w-5 h-5" />
-                  <span>Invia Richiesta e Ricevi Analisi Gratuita</span>
-                </button>
-              </form>
-            )}
           </div>
         </section>
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 text-center text-slate-500 text-sm">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-bold text-slate-300">
-            <Sparkles className="w-4 h-4 text-indigo-400" />
-            <span>SocialConvert Studio</span>
+      <footer className="border-t border-slate-900 bg-black py-8 px-4 text-center text-slate-500 text-xs">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 font-bold text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>FITPROTOCOL™ Online Coaching</span>
           </div>
-          <p>© 2026 SocialConvert Studio. Tutti i diritti riservati.</p>
-          <div className="flex gap-6 text-xs text-slate-400">
-            <a href="#problema" className="hover:text-slate-200">Strategia</a>
-            <a href="#servizi" className="hover:text-slate-200">Servizi</a>
-            <a href="#calcolatore" className="hover:text-slate-200">Preventivo</a>
+          <p>© 2026 FitProtocol Inc. Tutti i diritti riservati.</p>
+          <div className="flex gap-4 text-slate-400">
+            <span>Privacy Policy</span>
+            <span>Termini & Condizioni</span>
           </div>
         </div>
       </footer>
+
+      {/* 9. STICKY MOBILE CONVERSION BAR (FISSA IN BASSO SU CELLULARE) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 p-3 bg-slate-950/95 border-t border-slate-800 backdrop-blur-lg flex items-center justify-between gap-3 shadow-2xl">
+        <div>
+          <div className="text-[11px] font-bold text-amber-400 flex items-center gap-1">
+            <Flame className="w-3.5 h-3.5 fill-amber-400" />
+            <span>Solo 4 posti rimasti</span>
+          </div>
+          <div className="text-[10px] text-slate-400">Valutazione 1-a-1 inclusa</div>
+        </div>
+        <a
+          href="#quiz-section"
+          className="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20 active:scale-95 transition-transform"
+        >
+          Fai il Test ⚡
+        </a>
+      </div>
     </div>
   );
 }
