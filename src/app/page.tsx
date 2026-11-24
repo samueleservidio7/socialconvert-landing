@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { COACHES, Coach } from "@/lib/data";
+import { COACHES, Coach, SERVICE_PLANS } from "@/lib/data";
 import { translations, Language } from "@/lib/translations";
 import {
   ArrowRight,
@@ -314,15 +314,15 @@ export default function Home() {
             </button>
 
             <Link
-              href="/admin"
+              href="/login"
               className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
                 isDark
-                  ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-amber-500/50"
+                  ? "bg-slate-900/80 border-slate-800 text-slate-300 hover:border-amber-500/50 hover:text-white"
                   : "bg-slate-100 border-slate-300 text-slate-800 hover:border-slate-400"
               }`}
             >
-              <ShieldAlert className="w-3.5 h-3.5 text-indigo-400" />
-              <span>{t.navAdmin}</span>
+              <UserCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>Area Riservata & Portali</span>
             </Link>
 
             <a
@@ -1119,7 +1119,83 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. GARANZIA */}
+        {/* 7. I 3 SERVIZI & PERCORSI DI TRASFORMAZIONE */}
+        <section
+          id="piani-section"
+          className={`py-16 px-4 sm:px-6 max-w-6xl mx-auto border-t ${
+            isDark ? "border-slate-800/80" : "border-slate-200"
+          }`}
+        >
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center justify-center gap-1.5">
+              <Sparkles className="w-4 h-4" /> I Nostri Percorsi Ufficiali
+            </span>
+            <h2 className={`text-2xl sm:text-4xl font-black mt-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+              Scegli il livello di affiancamento ideale per te
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-2">
+              Tutti i percorsi includono l&apos;accesso immediato all&apos;Area Privata Clienti con schede, video 4K e piano nutrizionale.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+            {SERVICE_PLANS.map((plan) => (
+              <div
+                key={plan.id}
+                className={`p-6 sm:p-8 rounded-3xl border flex flex-col justify-between relative transition-all ${
+                  plan.popular
+                    ? "bg-gradient-to-b from-amber-950/30 via-slate-900 to-slate-900 border-2 border-amber-500 shadow-2xl shadow-amber-500/15 md:-translate-y-2"
+                    : isDark
+                    ? "bg-slate-900/60 border-slate-800"
+                    : "bg-white border-slate-200 shadow-lg"
+                }`}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3.5 right-6 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-md">
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div>
+                  <h3 className={`text-xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                    {plan.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{plan.tagline}</p>
+
+                  <div className="my-6">
+                    <span className="text-4xl font-black text-amber-500">{plan.price} €</span>
+                    <span className="text-xs text-slate-400 ml-2">/ {plan.duration} una tantum</span>
+                  </div>
+
+                  <div className="space-y-3 pt-2 border-t border-slate-800/80 mb-8">
+                    {plan.features.map((feat, fIdx) => (
+                      <div key={fIdx} className="flex items-start gap-2.5 text-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        <span className={isDark ? "text-slate-300" : "text-slate-700"}>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <a
+                    href="#quiz-section"
+                    className={`w-full py-3.5 rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition-all ${
+                      plan.popular
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/25 hover:brightness-110"
+                        : "bg-slate-800 hover:bg-slate-700 text-white"
+                    }`}
+                  >
+                    <span>Candidati per questo Percorso</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 8. GARANZIA */}
         <section className="py-12 px-4 sm:px-6 max-w-4xl mx-auto">
           <div
             className={`p-8 sm:p-10 rounded-3xl border-2 text-center relative overflow-hidden ${
@@ -1220,22 +1296,36 @@ export default function Home() {
         </section>
       </main>
 
-      {/* FOOTER */}
+      {/* FOOTER MULTI-RUOLO */}
       <footer
-        className={`border-t py-8 px-4 text-center text-xs ${
+        className={`border-t py-10 px-4 text-center text-xs ${
           isDark ? "border-slate-900 bg-black text-slate-500" : "border-slate-200 bg-white text-slate-500"
         }`}
       >
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2 font-bold text-slate-400">
-            <span className="w-2 h-2 rounded-full bg-amber-500" />
-            <span>FITPROTOCOL™ Online Coaching Network</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            <span className="text-sm">FITPROTOCOL™ Enterprise Fitness System</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="hover:text-amber-500 transition-colors">
-              HQ Admin Portal
+
+          {/* LINK MULTI-RUOLO SENZA VICOLI CIECHI */}
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold">
+            <Link href="/client" className="hover:text-amber-400 text-slate-300 transition-colors">
+              👤 Area Privata Allievo
             </Link>
-            <span>© 2026 FitProtocol Inc.</span>
+            <Link href="/coach" className="hover:text-indigo-400 text-slate-300 transition-colors">
+              🏋️‍♂️ Portale Formatori Coach
+            </Link>
+            <Link href="/admin" className="hover:text-emerald-400 text-slate-300 transition-colors">
+              👑 Super Admin HQ
+            </Link>
+            <Link href="/login" className="hover:text-amber-400 text-amber-500 transition-colors">
+              🔑 Accedi ai Portali
+            </Link>
+          </div>
+
+          <div className="text-slate-500 text-[11px]">
+            © 2026 FitProtocol Inc. Tutti i diritti riservati.
           </div>
         </div>
       </footer>

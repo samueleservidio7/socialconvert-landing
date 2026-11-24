@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   Lock,
   Users,
+  User,
   TrendingUp,
   DollarSign,
   Star,
@@ -193,10 +194,27 @@ export default function AdminPage() {
             </button>
 
             <Link
-              href="/"
-              className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-lg shadow-amber-500/20 transition-all"
+              href="/client"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
             >
-              Sito Live
+              <User className="w-3.5 h-3.5 text-amber-400" />
+              <span>Vista Allievo</span>
+            </Link>
+
+            <Link
+              href="/coach"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Vista Coach</span>
+            </Link>
+
+            <Link
+              href="/login"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+            >
+              <Key className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Cambia Ruolo</span>
             </Link>
           </div>
         </div>

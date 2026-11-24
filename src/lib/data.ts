@@ -8,7 +8,7 @@ export interface Coach {
   rating: number;
   reviewCount: number;
   activeClients: number;
-  conversionRate: number; // e.g. 34%
+  conversionRate: number;
   totalRevenue: number;
   monthlyRevenue: number;
   bioIt: string;
@@ -90,6 +90,153 @@ export const COACHES: Coach[] = [
     matchGoals: ["posture_energy"],
     phone: "39333100004",
   },
+];
+
+// I 3 SERVIZI CHIAVE OFFERTI
+export interface ServicePlan {
+  id: string;
+  name: string;
+  badge?: string;
+  tagline: string;
+  price: number;
+  duration: string;
+  popular?: boolean;
+  features: string[];
+}
+
+export const SERVICE_PLANS: ServicePlan[] = [
+  {
+    id: "plan-start",
+    name: "Protocollo START 90D",
+    tagline: "Per chi vuole iniziare con un metodo scientifico collaudato",
+    price: 390,
+    duration: "3 Mesi",
+    features: [
+      "Scheda di allenamento su App dedicata (3 sessioni da 45 min)",
+      "Guida nutrizionale con calcolo macronutrienti su misura",
+      "Guida ristoranti & cene aziendali per non sgarrare",
+      "Check-in quindicinale con revisione parametri",
+      "Accesso all'Area Privata Clienti con video esecuzioni 4K",
+    ],
+  },
+  {
+    id: "plan-elite",
+    name: "Protocollo ELITE 90D",
+    badge: "PIÙ SCELTO (92% SUCCESSO)",
+    tagline: "Il nostro percorso di punta con affiancamento 1-a-1 continuo",
+    price: 690,
+    duration: "3 Mesi",
+    popular: true,
+    features: [
+      "Tutto ciò che è incluso nel Protocollo START",
+      "Coach Dedicato Assegnato in base al tuo profilo metabolico",
+      "Check-In Video 1-a-1 Ogni Domenica con feedback personalizzato",
+      "Linea Diretta Privata WhatsApp 7 Giorni su 7 con il tuo Coach",
+      "Riadattamento settimanale di carichi, calorie e routine",
+      "Garanzia Totale 'Risultato o Rimborsato' a 30 giorni",
+    ],
+  },
+  {
+    id: "plan-vip",
+    name: "Protocollo VIP 180D Immersion",
+    badge: "TRASFORMAZIONE TOTALE",
+    tagline: "Per chi vuole cambiare per sempre il proprio fisico e stile di vita",
+    price: 1190,
+    duration: "6 Mesi",
+    features: [
+      "Tutto ciò che è incluso nel Protocollo ELITE per 6 Mesi",
+      "2 Videochiamate di Coaching Strategico al mese con l'Head Coach",
+      "Integrazione e supporto per longevità e salute ormonale",
+      "Supporto prioritario WhatsApp 24/7 con tempo di risposta < 2h",
+      "Accesso a vita all'archivio masterclass e protocolli avanzati",
+    ],
+  },
+];
+
+// DATI AREA PRIVATA CLIENTE (SIMULAZIONE CLIENTE ATTIVO)
+export const CLIENT_SESSION_DATA = {
+  id: "client-001",
+  name: "Francesco L.",
+  profession: "Avvocato (Studio Legale Milano)",
+  program: "Protocollo ELITE 90D",
+  currentWeek: 6,
+  totalWeeks: 12,
+  coach: {
+    name: "Marco 'Metabolic' Valenti",
+    role: "Head Coach Ricomposizione",
+    avatar: "MV",
+    phone: "39333100001",
+  },
+  stats: {
+    startWeight: "88.4 kg",
+    currentWeight: "81.6 kg",
+    weightLost: "-6.8 kg",
+    targetWeight: "78.0 kg",
+    bodyFatStart: "22.8%",
+    bodyFatCurrent: "16.4%",
+    waistStart: "96 cm",
+    waistCurrent: "87 cm",
+  },
+  nutrition: {
+    dailyCalories: 2150,
+    proteinGrams: 165,
+    carbsGrams: 210,
+    fatGrams: 65,
+    waterLiters: "3.0 L",
+    notes: "Durante le cene di lavoro: privilegiare tagli magri di carne o pesce alla griglia e verdure, limitando il pane a 1 porzione. Goditi 1 calice di vino senza sensi di colpa.",
+  },
+  workoutSplit: [
+    {
+      day: "Sessione A (Lunedì)",
+      title: "Upper Body Push & Core",
+      duration: "45 min",
+      exercises: [
+        { name: "Panca Piana con Bilanciere", sets: "4", reps: "8-10", rest: "90s", load: "75 kg", videoUrl: "https://example.com/panca" },
+        { name: "Military Press con Manubri", sets: "3", reps: "10-12", rest: "75s", load: "22 kg per manubrio", videoUrl: "https://example.com/military" },
+        { name: "Dip alle Parallele (o Piegamenti)", sets: "3", reps: "12", rest: "60s", load: "Corpo Libero", videoUrl: "https://example.com/dips" },
+        { name: "Alzate Laterali al Cavo Singolo", sets: "4", reps: "15", rest: "45s", load: "8 kg", videoUrl: "https://example.com/laterali" },
+        { name: "Plank Addominale con Sovraccarico", sets: "3", reps: "45 sec", rest: "45s", load: "+10 kg", videoUrl: "https://example.com/plank" },
+      ],
+    },
+    {
+      day: "Sessione B (Mercoledì)",
+      title: "Upper Body Pull & Postura",
+      duration: "45 min",
+      exercises: [
+        { name: "Trazioni alla Sbarra (o Lat Machine)", sets: "4", reps: "8", rest: "90s", load: "70 kg", videoUrl: "https://example.com/lat" },
+        { name: "Rematore con Manubrio su Panca", sets: "3", reps: "10 per lato", rest: "75s", load: "28 kg", videoUrl: "https://example.com/rematore" },
+        { name: "Pulley Basso Presa a V", sets: "3", reps: "12", rest: "60s", load: "55 kg", videoUrl: "https://example.com/pulley" },
+        { name: "Face Pull al Cavo Alto (Cuffia dei rotatori)", sets: "4", reps: "15", rest: "45s", load: "20 kg", videoUrl: "https://example.com/facepull" },
+        { name: "Curl Bicipiti con Manubri su Inclinata", sets: "3", reps: "12", rest: "60s", load: "14 kg", videoUrl: "https://example.com/bicipiti" },
+      ],
+    },
+    {
+      day: "Sessione C (Venerdì)",
+      title: "Lower Body & Stimolo Metabolico",
+      duration: "50 min",
+      exercises: [
+        { name: "Goblet Squat (o Squat con Bilanciere)", sets: "4", reps: "10", rest: "90s", load: "32 kg", videoUrl: "https://example.com/squat" },
+        { name: "Stacco Rumeno con Manubri (Femorali)", sets: "4", reps: "10-12", rest: "75s", load: "26 kg per manubrio", videoUrl: "https://example.com/stacco" },
+        { name: "Affondi Camminati con Manubri", sets: "3", reps: "12 passi per gamba", rest: "60s", load: "16 kg per manubrio", videoUrl: "https://example.com/affondi" },
+        { name: "Calf Raise su Gradino per Polpacci", sets: "4", reps: "15", rest: "45s", load: "Corpo libero + peso", videoUrl: "https://example.com/calf" },
+        { name: "Hanging Leg Raise (Addome basso)", sets: "3", reps: "12-15", rest: "45s", load: "Corpo Libero", videoUrl: "https://example.com/legraise" },
+      ],
+    },
+  ],
+  checkInHistory: [
+    { week: "Settimana 5", weight: "82.2 kg", waist: "88 cm", coachFeedback: "Ottimo progresso Francesco! Il deficit calorico sta lavorando perfettamente. Abbiamo alzato di 2.5 kg la panca piana.", date: "Domenica scorsa" },
+    { week: "Settimana 4", weight: "83.0 kg", waist: "89 cm", coachFeedback: "Addome visibilmente più piatto. Buona gestione delle cene di lavoro a Roma.", date: "2 settimane fa" },
+    { week: "Settimana 3", weight: "84.3 kg", waist: "91 cm", coachFeedback: "Superato il primo adattamento, livelli di energia in netto aumento.", date: "3 settimane fa" },
+  ],
+};
+
+// DATI FORMATORE (ALLIEVI ASSEGNATI A COACH MARCO)
+export const COACH_STUDENTS_ROSTER = [
+  { id: "stu-1", name: "Francesco L.", program: "ELITE 90D", week: 6, lastWeight: "81.6 kg (-6.8 kg)", checkInStatus: "In Attesa di Revisione", phone: "+39 340 1234567" },
+  { id: "stu-2", name: "Matteo D.", program: "VIP 180D", week: 11, lastWeight: "74.2 kg (+4.8 kg muscolo)", checkInStatus: "Completato", phone: "+39 349 2345678" },
+  { id: "stu-3", name: "Elena B.", program: "ELITE 90D", week: 3, lastWeight: "63.4 kg (-2.1 kg)", checkInStatus: "Completato", phone: "+39 335 3456789" },
+  { id: "stu-4", name: "Gabriele S.", program: "START 90D", week: 8, lastWeight: "79.0 kg (-5.4 kg)", checkInStatus: "In Attesa di Revisione", phone: "+39 328 4567890" },
+  { id: "stu-5", name: "Andrea P.", program: "ELITE 90D", week: 1, lastWeight: "89.5 kg (Inizio)", checkInStatus: "Nuovo Inizio", phone: "+39 333 5678901" },
 ];
 
 export interface Lead {
@@ -240,9 +387,10 @@ export const MOCK_REVIEWS: Review[] = [
 ];
 
 export const SECURITY_AUDIT_LOGS = [
-  { timestamp: "14:48:12", event: "Anti-CSRF & Origin Validation", status: "VERIFICATO", ip: "192.168.1.*** (Anonimizzato)" },
-  { timestamp: "14:45:01", event: "XSS Input Sanitization su Lead Form", status: "ATTIVO (0 Minacce)", ip: "87.18.***.***" },
-  { timestamp: "14:40:22", event: "Rate Limiter (Max 5 tentativi / min)", status: "PROTETTO", ip: "Sistema Shield" },
-  { timestamp: "14:32:09", event: "Privacy Policy Anonymizer (GDPR Ready)", status: "CONFORME", ip: "Tutti i dati crittografati" },
+  { timestamp: "15:42:10", event: "Multi-Role Session Authorization (Client / Coach / Admin)", status: "AUTORIZZATO", ip: "192.168.1.*** (Cifrato)" },
+  { timestamp: "15:35:12", event: "Anti-CSRF & Origin Validation", status: "VERIFICATO", ip: "192.168.1.*** (Anonimizzato)" },
+  { timestamp: "15:22:01", event: "XSS Input Sanitization su Lead Form", status: "ATTIVO (0 Minacce)", ip: "87.18.***.***" },
+  { timestamp: "15:10:22", event: "Rate Limiter (Max 5 tentativi / min)", status: "PROTETTO", ip: "Sistema Shield" },
+  { timestamp: "14:52:09", event: "Privacy Policy Anonymizer (GDPR Ready)", status: "CONFORME", ip: "Tutti i dati crittografati" },
   { timestamp: "14:15:40", event: "SQL / NoSQL Injection Barrier", status: "SICURO", ip: "Audit Passed" },
 ];
