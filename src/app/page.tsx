@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { COACHES, Coach } from "@/lib/data";
 import { translations, Language } from "@/lib/translations";
@@ -27,6 +27,12 @@ import {
   Globe,
   UserCheck,
   ShieldAlert,
+  Play,
+  Pause,
+  Volume2,
+  X,
+  Send,
+  Sliders,
   Award,
 } from "lucide-react";
 
@@ -35,6 +41,68 @@ export default function Home() {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [lang, setLang] = useState<Language>("it");
   const t = translations[lang];
+
+  // --- COUNTDOWN TIMER TICKING ---
+  const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 44, seconds: 18 });
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        return { hours: 2, minutes: 30, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // --- SOCIAL PROOF TOAST (NOTIFICHE LIVE DI CONVERSIONE) ---
+  const [showToast, setShowToast] = useState<boolean>(true);
+  const [toastIndex, setToastIndex] = useState<number>(0);
+
+  const liveToasts = [
+    { name: "Marco da Milano", action: "ha appena prenotato la valutazione con Coach Valenti", time: "2 min fa" },
+    { name: "Elena da Torino", action: "ha iniziato il percorso 90D con Coach Rostagno", time: "6 min fa" },
+    { name: "Davide da Bologna", action: "ha completato il test di idoneità (Match: 98%)", time: "11 min fa" },
+    { name: "Francesco da Roma", action: "ha bloccato l'ultimo posto con Coach Moretti", time: "15 min fa" },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowToast(false);
+      setTimeout(() => {
+        setToastIndex((prev) => (prev + 1) % liveToasts.length);
+        setShowToast(true);
+      }, 800);
+    }, 9000);
+    return () => clearInterval(interval);
+  }, [liveToasts.length]);
+
+  // --- SLIDER INTERATTIVO PRIMA / DOPO ---
+  const [sliderPosition, setSliderPosition] = useState<number>(50);
+
+  // --- SIMULATORE MESSAGGIO VOCALE WHATSAPP ---
+  const [isPlayingVoice, setIsPlayingVoice] = useState<boolean>(false);
+  const [voiceProgress, setVoiceProgress] = useState<number>(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlayingVoice) {
+      interval = setInterval(() => {
+        setVoiceProgress((prev) => {
+          if (prev >= 100) {
+            setIsPlayingVoice(false);
+            return 0;
+          }
+          return prev + 2.5;
+        });
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isPlayingVoice]);
+
+  // --- FLOATING WHATSAPP CHAT DRAWER ---
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   // --- STATO DEL QUIZ DI CONVERSIONE (STEP FUNNEL) ---
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -56,7 +124,7 @@ export default function Home() {
 
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-  // --- LOGICA DI MATCHING INTELLIGENTE CON IL COACH DEDICATO ---
+  // Logica matching coach
   const getMatchedCoach = (): Coach => {
     switch (selectedGoalKey) {
       case "fat_loss":
@@ -74,7 +142,6 @@ export default function Home() {
 
   const matchedCoach = getMatchedCoach();
 
-  // Animazione calcolo quiz
   const handleNextToCalculate = () => {
     setIsCalculating(true);
     setCurrentStep(4);
@@ -93,7 +160,6 @@ export default function Home() {
     }, 200);
   };
 
-  // Sanitizzazione input anti-XSS e anti-hacker
   const sanitizeInput = (val: string) => {
     return val.replace(/[<>'"/]/g, "").trim();
   };
@@ -106,21 +172,20 @@ export default function Home() {
     setIsSubmitted(true);
   };
 
-  // Generatore link WhatsApp dedicato al Coach specifico
-  const getWhatsAppLink = () => {
+  const getWhatsAppLink = (customMsg?: string) => {
     const text = encodeURIComponent(
-      `Ciao Coach ${matchedCoach.name}!\n\n` +
-        `Ho completato il test su Instagram e il sistema mi ha abbinato a te come formatore ideale (Match: 98%).\n\n` +
-        `👤 Nome: ${leadForm.name || "Nuovo Allievo"}\n` +
-        `🎯 Obiettivo: ${quizAnswers.goal}\n` +
-        `⏱ Disponibilità: ${quizAnswers.frequency}\n` +
-        `🚧 Ostacolo principale: ${quizAnswers.blocker}\n\n` +
-        `Vorrei ricevere la valutazione 1-a-1 e capire se hai disponibilità per seguirmi!`
+      customMsg ||
+        `Ciao Coach ${matchedCoach.name}!\n\n` +
+          `Ho completato il test su Instagram e il sistema mi ha abbinato a te come formatore ideale (Match: 98.4%).\n\n` +
+          `👤 Nome: ${leadForm.name || "Nuovo Allievo"}\n` +
+          `🎯 Obiettivo: ${quizAnswers.goal}\n` +
+          `⏱ Disponibilità: ${quizAnswers.frequency}\n` +
+          `🚧 Ostacolo principale: ${quizAnswers.blocker}\n\n` +
+          `Vorrei ricevere la valutazione 1-a-1 e capire se hai disponibilità per seguirmi!`
     );
     return `https://wa.me/${matchedCoach.phone}?text=${text}`;
   };
 
-  // --- STATO FAQ INTERATTIVE ---
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const faqs = [
@@ -166,13 +231,29 @@ export default function Home() {
         isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-900"
       }`}
     >
-      {/* 1. BARRA DI URGENZA SOCIAL ADS */}
-      <div className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-slate-950 text-xs sm:text-sm font-extrabold py-2 px-4 text-center tracking-tight shadow-md flex items-center justify-center gap-2">
-        <Flame className="w-4 h-4 fill-slate-950" />
-        <span>{t.urgencyBar}</span>
+      {/* 1. TOP URGENCY BAR CON COUNTDOWN TICKING */}
+      <div className="bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 text-slate-950 text-xs sm:text-sm font-extrabold py-2 px-4 text-center tracking-tight shadow-md flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5">
+          <Flame className="w-4 h-4 fill-slate-950 animate-bounce" />
+          <span>{t.urgencyBar}</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-black/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-black">
+          <span>{t.countdownLabel}</span>
+          <span className="bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded">
+            {String(timeLeft.hours).padStart(2, "0")}h
+          </span>
+          :
+          <span className="bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded">
+            {String(timeLeft.minutes).padStart(2, "0")}m
+          </span>
+          :
+          <span className="bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded">
+            {String(timeLeft.seconds).padStart(2, "0")}s
+          </span>
+        </div>
       </div>
 
-      {/* SFONDO GLOW (SOLO DARK MODE) */}
+      {/* SFONDO GLOW */}
       {isDark && (
         <div className="fixed inset-0 pointer-events-none z-0">
           <div className="absolute top-[5%] left-[10%] w-[500px] h-[500px] bg-amber-500/10 blur-[140px] rounded-full" />
@@ -180,7 +261,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* HEADER PRINCIPALE CON CONTROLLI TEMA, LINGUA E ADMIN */}
+      {/* HEADER PRINCIPALE */}
       <header
         className={`sticky top-0 z-40 backdrop-blur-xl border-b transition-colors ${
           isDark
@@ -205,7 +286,6 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* SELETTORE LINGUA (IT / EN) */}
             <button
               type="button"
               onClick={() => setLang(lang === "it" ? "en" : "it")}
@@ -220,7 +300,6 @@ export default function Home() {
               <span>{lang.toUpperCase()}</span>
             </button>
 
-            {/* SELETTORE TEMA (DARK / LIGHT) */}
             <button
               type="button"
               onClick={() => setTheme(isDark ? "light" : "dark")}
@@ -234,7 +313,6 @@ export default function Home() {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* LINK ALL'AREA ADMIN */}
             <Link
               href="/admin"
               className={`hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
@@ -247,7 +325,6 @@ export default function Home() {
               <span>{t.navAdmin}</span>
             </Link>
 
-            {/* CTA HEADER */}
             <a
               href="#quiz-section"
               className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:brightness-110 shadow-lg shadow-amber-500/25 transition-all"
@@ -261,7 +338,7 @@ export default function Home() {
 
       <main className="relative z-10">
         {/* HERO SECTION */}
-        <section className="pt-12 sm:pt-20 pb-16 px-4 sm:px-6 max-w-5xl mx-auto text-center">
+        <section className="pt-12 sm:pt-20 pb-14 px-4 sm:px-6 max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs sm:text-sm font-semibold mb-6 backdrop-blur-md">
             <Zap className="w-4 h-4 fill-amber-500" />
             <span>{t.heroBadge}</span>
@@ -285,6 +362,19 @@ export default function Home() {
           >
             {t.heroDesc}
           </p>
+
+          {/* PROGRESSO POSTI DISPONIBILI */}
+          <div className="mt-8 max-w-md mx-auto p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+            <div className="flex items-center justify-between text-xs font-bold mb-2">
+              <span className="text-amber-500 flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 fill-amber-500" /> {t.seatsProgress}
+              </span>
+              <span className={isDark ? "text-white" : "text-slate-900"}>73% Assegnati</span>
+            </div>
+            <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 h-full w-[73%]" />
+            </div>
+          </div>
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
@@ -317,7 +407,186 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 2. IL QUIZ CON MATCHING INTELLIGENTE DEL COACH */}
+        {/* 2. SLIDER INTERATTIVO PRIMA / DOPO */}
+        <section
+          className={`py-16 px-4 sm:px-6 max-w-4xl mx-auto border-t ${
+            isDark ? "border-slate-800/80" : "border-slate-200"
+          }`}
+        >
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-500 flex items-center justify-center gap-1.5">
+              <Sliders className="w-4 h-4" /> Risultati Documentati
+            </span>
+            <h2 className={`text-2xl sm:text-3xl font-black mt-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+              {t.sliderTitle}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">{t.sliderSub}</p>
+          </div>
+
+          <div
+            className={`p-6 sm:p-8 rounded-3xl border shadow-xl ${
+              isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200"
+            }`}
+          >
+            {/* Visualizzatore di Confronto Metrico */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              {/* Box PRIMA */}
+              <div
+                className={`p-5 rounded-2xl border transition-all ${
+                  sliderPosition < 50
+                    ? "border-amber-500 bg-amber-500/10"
+                    : isDark
+                    ? "border-slate-800 bg-slate-950/60"
+                    : "border-slate-200 bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300">
+                    {t.sliderBefore}
+                  </span>
+                  <span className="text-xs text-rose-400 font-bold">22.8% Massa Grassa</span>
+                </div>
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Peso Corporeo:</span>
+                    <span className="font-bold">88.4 kg</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Giro Vita Addome:</span>
+                    <span className="font-bold">96 cm</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Energia Giornaliera:</span>
+                    <span className="font-bold text-rose-400">Bassa (Crolli post pranzo)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Box DOPO */}
+              <div
+                className={`p-5 rounded-2xl border transition-all ${
+                  sliderPosition >= 50
+                    ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
+                    : isDark
+                    ? "border-slate-800 bg-slate-950/60"
+                    : "border-slate-200 bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500 text-slate-950">
+                    {t.sliderAfter}
+                  </span>
+                  <span className="text-xs text-emerald-400 font-bold">12.6% Massa Grassa</span>
+                </div>
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Peso Corporeo:</span>
+                    <span className="font-bold text-emerald-400">78.6 kg (-9.8 KG)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Giro Vita Addome:</span>
+                    <span className="font-bold text-emerald-400">84 cm (-12 CM)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Tono Addome & Spalle:</span>
+                    <span className="font-bold text-emerald-400">+3.4 kg Massa Magra</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Slider interattivo */}
+            <div className="mt-8 pt-6 border-t border-slate-800/80">
+              <div className="flex items-center justify-between text-xs font-bold mb-2">
+                <span className="text-slate-400">Settimana 0</span>
+                <span className="text-amber-500">Trascina per esplorare l&apos;evoluzione</span>
+                <span className="text-emerald-400">Settimana 12</span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={sliderPosition}
+                onChange={(e) => setSliderPosition(Number(e.target.value))}
+                className="w-full h-2.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 3. SIMULATORE MESSAGGIO VOCALE WHATSAPP */}
+        <section
+          className={`py-12 px-4 sm:px-6 max-w-3xl mx-auto border-t ${
+            isDark ? "border-slate-800/80" : "border-slate-200"
+          }`}
+        >
+          <div
+            className={`p-6 sm:p-8 rounded-3xl border shadow-xl relative overflow-hidden ${
+              isDark
+                ? "bg-gradient-to-r from-emerald-950/30 via-slate-900 to-slate-900 border-emerald-500/40"
+                : "bg-emerald-50/70 border-emerald-300"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-500">
+                <Volume2 className="w-4 h-4" />
+                <span>{t.voiceTitle}</span>
+              </div>
+              <span className="text-[11px] font-semibold text-slate-400">WhatsApp Audio</span>
+            </div>
+
+            <p className="text-xs text-slate-400 mb-6">{t.voiceSub}</p>
+
+            {/* Card Lettore Vocale WhatsApp */}
+            <div
+              className={`p-4 rounded-2xl border flex items-center gap-4 ${
+                isDark ? "bg-slate-950/80 border-slate-800" : "bg-white border-slate-200"
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => setIsPlayingVoice(!isPlayingVoice)}
+                className="w-12 h-12 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/25 transition-transform active:scale-95"
+              >
+                {isPlayingVoice ? <Pause className="w-5 h-5 fill-slate-950" /> : <Play className="w-5 h-5 fill-slate-950 ml-0.5" />}
+              </button>
+
+              <div className="flex-1">
+                <div className="flex items-center justify-between text-xs font-bold mb-1.5">
+                  <span className={isDark ? "text-white" : "text-slate-900"}>{t.voiceSender}</span>
+                  <span className="font-mono text-emerald-500">
+                    {isPlayingVoice ? `0:${Math.floor(voiceProgress * 0.38).toString().padStart(2, "0")}` : t.voiceDuration}
+                  </span>
+                </div>
+
+                {/* Onda sonora animata WhatsApp */}
+                <div className="flex items-center gap-1 h-6">
+                  {[4, 12, 18, 8, 22, 15, 10, 24, 16, 12, 20, 8, 14, 22, 18, 12, 6, 16, 20, 10, 14, 8].map((h, i) => (
+                    <div
+                      key={i}
+                      className={`w-1 rounded-full transition-all duration-150 ${
+                        isPlayingVoice
+                          ? "bg-emerald-400 animate-pulse"
+                          : i < (voiceProgress / 100) * 22
+                          ? "bg-emerald-500"
+                          : isDark
+                          ? "bg-slate-800"
+                          : "bg-slate-300"
+                      }`}
+                      style={{ height: isPlayingVoice ? `${Math.max(6, (h * (i % 3 + 1)) % 24)}px` : `${h}px` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 rounded-xl bg-slate-950/40 text-xs text-slate-400 italic">
+              &ldquo;Coach, volevo dirti che ieri ho provato il completo di 3 anni fa e mi va di nuovo perfetto! La cosa incredibile è che venerdì sono andato a cena fuori con i clienti senza sentirmi escluso... sei un fenomeno.&rdquo;
+            </div>
+          </div>
+        </section>
+
+        {/* 4. IL QUIZ CON MATCHING INTELLIGENTE DEL COACH */}
         <section id="quiz-section" className="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto">
           <div
             className={`rounded-3xl p-6 sm:p-10 shadow-2xl backdrop-blur-2xl border-2 transition-all ${
@@ -326,7 +595,6 @@ export default function Home() {
                 : "bg-white border-amber-500/50 text-slate-900 shadow-amber-500/10"
             }`}
           >
-            {/* INTESTAZIONE QUIZ */}
             <div
               className={`flex items-center justify-between pb-6 mb-6 border-b ${
                 isDark ? "border-slate-800" : "border-slate-200"
@@ -550,7 +818,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* STEP 4: SCHEDA DEL COACH ASSEGNATO E CANDIDATURA */}
+            {/* STEP 4: RISULTATO E MATCH COACH */}
             {currentStep === 4 && (
               <div>
                 {isCalculating ? (
@@ -572,7 +840,6 @@ export default function Home() {
                     </div>
                   </div>
                 ) : isSubmitted ? (
-                  /* CONFERMA E DIRETTA WHATSAPP AL COACH */
                   <div className="py-8 text-center space-y-6 animate-fadeIn">
                     <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto">
                       <CheckCircle2 className="w-10 h-10" />
@@ -587,7 +854,6 @@ export default function Home() {
                       {t.leadSuccessSub}
                     </p>
 
-                    {/* SCHEDA DEL COACH ASSEGNATO */}
                     <div
                       className={`p-5 rounded-2xl border text-left max-w-md mx-auto flex items-center gap-4 ${
                         isDark ? "bg-slate-950 border-amber-500/40" : "bg-slate-50 border-amber-400"
@@ -620,9 +886,7 @@ export default function Home() {
                     </div>
                   </div>
                 ) : (
-                  /* MODULO CON CARD DEL COACH ASSEGNATO */
                   <div className="space-y-6 animate-fadeIn">
-                    {/* CARD DEL COACH ASSEGNATO */}
                     <div
                       className={`p-5 rounded-2xl border relative overflow-hidden ${
                         isDark
@@ -731,7 +995,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 3. CONFRONTO: METODO VECCHIO VS NUOVO */}
+        {/* 5. CONFRONTO: METODO VECCHIO VS NUOVO */}
         <section
           className={`py-16 px-4 sm:px-6 max-w-5xl mx-auto border-t ${
             isDark ? "border-slate-800/80" : "border-slate-200"
@@ -807,7 +1071,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 4. VALUE STACK */}
+        {/* 6. VALUE STACK */}
         <section
           className={`py-16 px-4 sm:px-6 max-w-4xl mx-auto border-t ${
             isDark ? "border-slate-800/80" : "border-slate-200"
@@ -855,7 +1119,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. GARANZIA */}
+        {/* 7. GARANZIA */}
         <section className="py-12 px-4 sm:px-6 max-w-4xl mx-auto">
           <div
             className={`p-8 sm:p-10 rounded-3xl border-2 text-center relative overflow-hidden ${
@@ -880,7 +1144,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6. FAQ */}
+        {/* 8. FAQ */}
         <section
           className={`py-16 px-4 sm:px-6 max-w-3xl mx-auto border-t ${
             isDark ? "border-slate-800/80" : "border-slate-200"
@@ -931,7 +1195,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 7. CTA FINALE */}
+        {/* 9. CTA FINALE */}
         <section
           className={`py-16 px-4 sm:px-6 text-center border-t ${
             isDark ? "border-slate-800/80 bg-slate-950" : "border-slate-200 bg-slate-100"
@@ -976,9 +1240,136 @@ export default function Home() {
         </div>
       </footer>
 
-      {/* STICKY BOTTOM BAR SU MOBILE */}
+      {/* 10. SOCIAL PROOF LIVE TOAST (FOMO NOTIFICATION IN BASSO A SINISTRA) */}
+      {showToast && (
+        <div className="fixed bottom-6 left-6 z-50 animate-slideUp max-w-sm">
+          <div
+            className={`p-3.5 rounded-2xl border shadow-2xl backdrop-blur-xl flex items-center gap-3 ${
+              isDark
+                ? "bg-slate-900/90 border-slate-700/80 text-white"
+                : "bg-white/95 border-slate-300 text-slate-900"
+            }`}
+          >
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <div className="flex-1 pr-1">
+              <div className="text-xs font-bold leading-tight">
+                {liveToasts[toastIndex].name}
+              </div>
+              <div className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                {liveToasts[toastIndex].action}
+              </div>
+              <div className="text-[10px] text-amber-500 font-semibold mt-1">
+                {liveToasts[toastIndex].time}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowToast(false)}
+              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 11. FLOATING WHATSAPP CHAT BUTTON & DRAWER (IN BASSO A DESTRA) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        {!isChatOpen ? (
+          <button
+            type="button"
+            onClick={() => setIsChatOpen(true)}
+            className="w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center shadow-2xl shadow-emerald-500/40 hover:scale-110 active:scale-95 transition-all relative"
+            title="Apri Chat WhatsApp con il Coach"
+          >
+            <MessageCircle className="w-7 h-7 fill-slate-950" />
+            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-[10px] font-black text-slate-950 flex items-center justify-center animate-pulse">
+              1
+            </span>
+          </button>
+        ) : (
+          <div
+            className={`w-80 sm:w-88 rounded-3xl border shadow-2xl overflow-hidden animate-scaleIn backdrop-blur-2xl ${
+              isDark ? "bg-slate-900 border-slate-700" : "bg-white border-slate-300"
+            }`}
+          >
+            {/* Header del Drawer */}
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full bg-slate-950 text-white font-bold flex items-center justify-center text-xs">
+                    {matchedCoach.avatar}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-slate-950" />
+                </div>
+                <div>
+                  <div className="font-bold text-sm leading-tight">{matchedCoach.name}</div>
+                  <div className="text-[11px] text-emerald-100 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
+                    <span>{t.chatStatus}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsChatOpen(false)}
+                className="p-1 rounded-lg hover:bg-emerald-700 text-white/80"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Corpo della Chat */}
+            <div
+              className={`p-4 space-y-3 text-xs leading-relaxed max-h-72 overflow-y-auto ${
+                isDark ? "bg-slate-950/70" : "bg-slate-50"
+              }`}
+            >
+              <div className="p-3 rounded-2xl rounded-tl-sm bg-emerald-500/15 border border-emerald-500/30 text-slate-200">
+                {t.chatBubble}
+              </div>
+
+              {/* Quick Prompt Chips */}
+              <div className="pt-2 space-y-1.5">
+                {[
+                  "Quanto costa il percorso?",
+                  "Non ho mai fatto palestra, è adatto?",
+                  "Posso allenarmi solo a casa?",
+                ].map((chip, idx) => (
+                  <a
+                    key={idx}
+                    href={getWhatsAppLink(`Ciao Coach! ${chip}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:border-emerald-500 hover:text-white transition-colors"
+                  >
+                    💬 {chip}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer con CTA diretta WhatsApp */}
+            <div className="p-3 border-t border-slate-800 bg-slate-900/90">
+              <a
+                href={getWhatsAppLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 rounded-xl font-bold text-xs bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all"
+              >
+                <MessageCircle className="w-4 h-4 fill-slate-950" />
+                <span>{t.chatCta}</span>
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 12. STICKY BOTTOM BAR SU MOBILE */}
       <div
-        className={`sm:hidden fixed bottom-0 left-0 right-0 z-50 p-3 border-t backdrop-blur-lg flex items-center justify-between gap-3 shadow-2xl ${
+        className={`sm:hidden fixed bottom-0 left-0 right-0 z-40 p-3 border-t backdrop-blur-lg flex items-center justify-between gap-3 shadow-2xl ${
           isDark ? "bg-slate-950/95 border-slate-800" : "bg-white/95 border-slate-200"
         }`}
       >
